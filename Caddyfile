@@ -1,0 +1,49 @@
+# Основной домен с запасным вариантом HTTP
+webhook.5gvpn.pw {
+    # Используем self-signed сертификат для тестирования
+    tls internal
+    
+    # Вебхук для YooKassa
+    handle /yookassa-webhook* {
+        reverse_proxy bot:8082
+    }
+    
+    # Вебхук для CryptoBot
+    handle /cryptobot-webhook* {
+        reverse_proxy bot:8083
+    }
+    
+    # Вебхук для Tribute (если нужно)
+    handle /tribute-webhook* {
+        reverse_proxy bot:8081
+    }
+    
+    # Health check
+    handle /health {
+        reverse_proxy bot:8081/health
+    }
+    
+    # Основное приложение
+    reverse_proxy bot:8000
+}
+
+# Резервный HTTP доступ на случай проблем с SSL
+:80 {
+    handle /yookassa-webhook* {
+        reverse_proxy bot:8082
+    }
+    
+    handle /cryptobot-webhook* {
+        reverse_proxy bot:8083
+    }
+    
+    handle /tribute-webhook* {
+        reverse_proxy bot:8081
+    }
+    
+    handle /health {
+        reverse_proxy bot:8081/health
+    }
+    
+    reverse_proxy bot:8000
+}
